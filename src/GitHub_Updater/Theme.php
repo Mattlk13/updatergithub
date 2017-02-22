@@ -142,10 +142,11 @@ class Theme extends Base {
 
 				$header = $this->parse_extra_headers( $header, $theme, $header_parts, $repo_parts );
 
-				$git_theme['type']                    = $repo_parts['type'];
-				$git_theme['uri']                     = $header['base_uri'] . '/' . $header['owner_repo'];
-				$git_theme['enterprise']              = $header['enterprise_uri'];
-				$git_theme['enterprise_api']          = $header['enterprise_api'];
+				$git_theme['type']           = $repo_parts['type'];
+				$git_theme['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_theme['enterprise']     = $header['enterprise_uri'];
+				$git_theme['enterprise_api'] = $header['enterprise_api'];
+				$git_theme['type'] .= empty( $header['enterprise_uri'] ) ? null : '_enterprise';
 				$git_theme['owner']                   = $header['owner'];
 				$git_theme['repo']                    = $header['repo'];
 				$git_theme['extended_repo']           = $header['repo'];

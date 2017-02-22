@@ -144,6 +144,7 @@ class Settings extends Base {
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
+
 			return $e->type;
 		}, $repos );
 
@@ -151,6 +152,9 @@ class Settings extends Base {
 
 		$gits = array_map( function( $e ) {
 			$e = explode( '_', $e );
+			if ( in_array( 'enterprise', $e ) && 'bitbucket' === $e[0] ) {
+				return 'bbenterprise';
+			}
 
 			return $e[0];
 		}, $gits );
@@ -531,7 +535,7 @@ class Settings extends Base {
 				/*
 				 * Set boolean if Bitbucket Server header found.
 				 */
-				if ( false !== strpos( $token->type, 'bbenterprise' ) &&
+				if ( false !== strpos( $token->type, 'bitbucket' ) &&
 				     ! empty( $token->enterprise ) &&
 				     ! parent::$auth_required['bitbucket_enterprise']
 				) {
@@ -1033,7 +1037,11 @@ class Settings extends Base {
 		$repos   = array_merge( $plugins, $themes );
 
 		$type_repos = array_filter( $repos, function( $e ) use ( $type ) {
-			return false !== stristr( $e->type, $type );
+			if ( ! empty( $e->enterprise ) ) {
+				return ( false !== stristr( $e->type, 'bitbucket' ) && 'bbenterprise' === $type );
+			} else {
+				return false !== stristr( $e->type, $type );
+			}
 		} );
 
 		$display_data = array_map( function( $e ) {
