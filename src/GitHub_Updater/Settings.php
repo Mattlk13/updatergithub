@@ -452,37 +452,6 @@ class Settings extends Base {
 		);
 
 		/*
-		 * Add settings for Bitbucket Enterprise Username and Password.
-		 */
-
-		if ( parent::$auth_required['bitbucket_enterprise'] ) {
-			add_settings_section(
-				'bitbucket_enterprise_user',
-				esc_html__( 'Bitbucket Enterprise Private Settings', 'github-updater' ),
-				array( &$this, 'print_section_bitbucket_username' ),
-				'github_updater_bbenterprise_install_settings'
-			);
-
-			add_settings_field(
-				'bitbucket_enterprise_username',
-				esc_html__( 'Bitbucket Enterprise Username', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_bbenterprise_install_settings',
-				'bitbucket_enterprise_user',
-				array( 'id' => 'bitbucket_enterprise_username' )
-			);
-
-			add_settings_field(
-				'bitbucket_enterprise_password',
-				esc_html__( 'Bitbucket Enterprise Password', 'github-updater' ),
-				array( &$this, 'token_callback_text' ),
-				'github_updater_bbenterprise_install_settings',
-				'bitbucket_enterprise_user',
-				array( 'id' => 'bitbucket_enterprise_password', 'token' => true )
-			);
-		}
-
-		/*
 		 * Show section for private Bitbucket repositories.
 		 */
 		if ( parent::$auth_required['bitbucket_private'] ) {
@@ -493,6 +462,48 @@ class Settings extends Base {
 				'github_updater_bitbucket_install_settings'
 			);
 		}
+
+		/*
+		 * Add settings for Bitbucket Enterprise Username and Password.
+		 */
+
+		add_settings_section(
+			'bitbucket_enterprise_user',
+			esc_html__( 'Bitbucket Enterprise Private Settings', 'github-updater' ),
+			array( &$this, 'print_section_bitbucket_username' ),
+			'github_updater_bbenterprise_install_settings'
+		);
+
+		add_settings_field(
+			'bitbucket_enterprise_username',
+			esc_html__( 'Bitbucket Enterprise Username', 'github-updater' ),
+			array( &$this, 'token_callback_text' ),
+			'github_updater_bbenterprise_install_settings',
+			'bitbucket_enterprise_user',
+			array( 'id' => 'bitbucket_enterprise_username' )
+		);
+
+		add_settings_field(
+			'bitbucket_enterprise_password',
+			esc_html__( 'Bitbucket Enterprise Password', 'github-updater' ),
+			array( &$this, 'token_callback_text' ),
+			'github_updater_bbenterprise_install_settings',
+			'bitbucket_enterprise_user',
+			array( 'id' => 'bitbucket_enterprise_password', 'token' => true )
+		);
+
+		/*
+		 * Show section for private Bitbucket Enterprise repositories.
+		 */
+		if ( parent::$auth_required['bitbucket_enterprise'] ) {
+			add_settings_section(
+				'bitbucket_server_id',
+				esc_html__( 'Bitbucket Enterprise Private Repositories', 'github-updater' ),
+				array( &$this, 'print_section_bitbucket_info' ),
+				'github_updater_bbenterprise_install_settings'
+			);
+		}
+
 
 		$this->update_settings();
 	}
@@ -516,7 +527,7 @@ class Settings extends Base {
 			 */
 			if ( $token->enterprise ) {
 				/*
-				 * Set boolean if GitHub Enterprise header found.
+				 * Set boolean if GitHub Enterprise found.
 				 */
 				if ( false !== strpos( $token->type, 'github' ) &&
 				     ! parent::$auth_required['github_enterprise']
@@ -524,7 +535,7 @@ class Settings extends Base {
 					parent::$auth_required['github_enterprise'] = true;
 				}
 				/*
-				 * Set boolean if GitLab CE/Enterprise header found.
+				 * Set boolean if GitLab CE/Enterprise found.
 				 */
 				if ( false !== strpos( $token->type, 'gitlab' ) &&
 				     ! empty( $token->enterprise ) &&
@@ -533,7 +544,7 @@ class Settings extends Base {
 					parent::$auth_required['gitlab_enterprise'] = true;
 				}
 				/*
-				 * Set boolean if Bitbucket Server header found.
+				 * Set boolean if Bitbucket Server found.
 				 */
 				if ( false !== strpos( $token->type, 'bitbucket' ) &&
 				     ! empty( $token->enterprise ) &&
@@ -598,16 +609,17 @@ class Settings extends Base {
 					$setting_field['callback']        = $token->repo;
 					break;
 				case 'bitbucket':
-					$setting_field['page']            = 'github_updater_bitbucket_install_settings';
-					$setting_field['section']         = 'bitbucket_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
-					$setting_field['callback']        = $token->repo;
-					break;
-				case 'bbenterprise':
-					$setting_field['page']            = 'github_updater_bbenterprise_install_settings';
-					$setting_field['section']         = 'bitbucket_id';
-					$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
-					$setting_field['callback']        = $token->repo;
+					if ( empty( $token->enterprise ) ) {
+						$setting_field['page']            = 'github_updater_bitbucket_install_settings';
+						$setting_field['section']         = 'bitbucket_id';
+						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
+						$setting_field['callback']        = $token->repo;
+					} else {
+						$setting_field['page']            = 'github_updater_bbenterprise_install_settings';
+						$setting_field['section']         = 'bitbucket_server_id';
+						$setting_field['callback_method'] = array( &$this, 'token_callback_checkbox' );
+						$setting_field['callback']        = $token->repo;
+					}
 					break;
 				case 'gitlab':
 					$setting_field['page']            = 'github_updater_gitlab_install_settings';
@@ -1011,8 +1023,8 @@ class Settings extends Base {
 	 * @param array $subtab Subtab to display
 	 */
 	private function add_hidden_settings_sections( $subtab = array() ) {
-		$subtabs   = array_keys( parent::$git_servers );
-		$hide_tabs = array_diff( $subtabs, (array) $subtab );
+		$subtabs   = array_keys( $this->settings_sub_tabs() );
+		$hide_tabs = array_diff( $subtabs, (array) $subtab, array( 'github_updater' ) );
 		if ( ! empty( $subtab ) ) {
 			echo '<div id="github_updater" class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_install_settings' );
