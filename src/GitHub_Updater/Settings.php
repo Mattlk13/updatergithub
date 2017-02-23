@@ -136,7 +136,7 @@ class Settings extends Base {
 	 * Return an array of the installed repository types.
 	 *
 	 * @access private
-	 * @return array
+	 * @return array $gits
 	 */
 	private function installed_git_repos() {
 		$plugins = Plugin::instance()->get_plugin_configs();
@@ -144,6 +144,9 @@ class Settings extends Base {
 
 		$repos = array_merge( $plugins, $themes );
 		$gits  = array_map( function( $e ) {
+			if ( ! empty( $e->enterprise ) && false !== stristr( $e->type, 'bitbucket' ) ) {
+				return 'bbenterprise';
+			}
 
 			return $e->type;
 		}, $repos );
@@ -152,9 +155,6 @@ class Settings extends Base {
 
 		$gits = array_map( function( $e ) {
 			$e = explode( '_', $e );
-			if ( in_array( 'enterprise', $e ) && 'bitbucket' === $e[0] ) {
-				return 'bbenterprise';
-			}
 
 			return $e[0];
 		}, $gits );
@@ -1014,12 +1014,12 @@ class Settings extends Base {
 		$subtabs   = array_keys( parent::$git_servers );
 		$hide_tabs = array_diff( $subtabs, (array) $subtab );
 		if ( ! empty( $subtab ) ) {
-			echo '<div class="hide-github-updater-settings">';
+			echo '<div id="github_updater" class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_install_settings' );
 			echo '</div>';
 		}
 		foreach ( $hide_tabs as $hide_tab ) {
-			echo '<div class="hide-github-updater-settings">';
+			echo '<div id="' . $hide_tab . '" class="hide-github-updater-settings">';
 			do_settings_sections( 'github_updater_' . $hide_tab . '_install_settings' );
 			echo '</div>';
 		}
@@ -1032,16 +1032,17 @@ class Settings extends Base {
 	 * @param $type
 	 */
 	private function display_ghu_repos( $type ) {
-		$plugins = Plugin::instance()->get_plugin_configs();
-		$themes  = Theme::instance()->get_theme_configs();
-		$repos   = array_merge( $plugins, $themes );
+		$plugins      = Plugin::instance()->get_plugin_configs();
+		$themes       = Theme::instance()->get_theme_configs();
+		$repos        = array_merge( $plugins, $themes );
+		$bbenterprise = array( 'bitbucket', 'bbenterprise' );
 
-		$type_repos = array_filter( $repos, function( $e ) use ( $type ) {
-			if ( ! empty( $e->enterprise ) ) {
+		$type_repos = array_filter( $repos, function( $e ) use ( $type, $bbenterprise ) {
+			if ( ! empty( $e->enterprise ) && in_array( $type, $bbenterprise ) ) {
 				return ( false !== stristr( $e->type, 'bitbucket' ) && 'bbenterprise' === $type );
-			} else {
-				return false !== stristr( $e->type, $type );
 			}
+
+			return ( false !== stristr( $e->type, $type ) );
 		} );
 
 		$display_data = array_map( function( $e ) {
