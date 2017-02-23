@@ -143,11 +143,10 @@ class Plugin extends Base {
 
 				$header = $this->parse_extra_headers( $header, $headers, $header_parts, $repo_parts );
 
-				$git_plugin['type']           = $repo_parts['type'];
-				$git_plugin['uri']            = $header['base_uri'] . '/' . $header['owner_repo'];
-				$git_plugin['enterprise']     = $header['enterprise_uri'];
-				$git_plugin['enterprise_api'] = $header['enterprise_api'];
-				$git_plugin['type'] .= empty( $header['enterprise_uri'] ) ? null : '_enterprise';
+				$git_plugin['type']                = $repo_parts['type'];
+				$git_plugin['uri']                 = $header['base_uri'] . '/' . $header['owner_repo'];
+				$git_plugin['enterprise']          = $header['enterprise_uri'];
+				$git_plugin['enterprise_api']      = $header['enterprise_api'];
 				$git_plugin['owner']               = $header['owner'];
 				$git_plugin['repo']                = $header['repo'];
 				$git_plugin['extended_repo']       = implode( '-', array(
