@@ -4,7 +4,9 @@
 * added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
 * refactored subtabs for Settings page
 * refactored parsing of extra headers, `Enterprise` and `CE` headers no longer needed
-* added support for Bitbucket Server :)
+* added support for Bitbucket Server!! Thanks @lkistenkas for access and especially to @BjornW for kicking it off
+* refactored `add_endpoints()` to use everywhere
+* make compatible with WordPress 4.4 and above only
 
 #### 6.2.2 / 2017-02-09
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
