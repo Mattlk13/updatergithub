@@ -468,7 +468,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 */
 	private function _recombine_response( $response ) {
 		$remote_info_file = '';
-		$json_decoded     = is_string( $response) ? json_decode( $response ) : null;
+		$json_decoded     = is_string( $response ) ? json_decode( $response ) : null;
 		$response         = empty( $json_decoded ) ? $response : $json_decoded;
 		if ( isset( $response->lines ) ) {
 			foreach ( $response->lines as $line ) {

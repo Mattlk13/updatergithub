@@ -56,7 +56,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'file';
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
+			$response     = $this->api( '/repos/:owner/:repo/contents/' . $file );
 			if ( ! isset( $response->content ) ) {
 				return false;
 			}
@@ -89,7 +89,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'tags';
-			$response = $this->api( '/repos/:owner/:repo/tags' );
+			$response     = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -137,7 +137,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
+			$response     = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
 				$response = $this->parse_changelog_response( $response );
@@ -186,7 +186,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
+			$response     = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
 		}
 
 		if ( $response && isset( $response->content ) ) {
@@ -215,7 +215,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'meta';
-			$response = $this->api( '/repos/:owner/:repo' );
+			$response     = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
 				$response = $this->parse_meta_response( $response );
@@ -248,7 +248,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'branches';
-			$response = $this->api( '/repos/:owner/:repo/branches' );
+			$response     = $this->api( '/repos/:owner/:repo/branches' );
 
 			if ( $response ) {
 				foreach ( $response as $branch ) {
@@ -352,7 +352,7 @@ class GitHub_API extends API {
 
 		if ( ! $response ) {
 			self::$method = 'translation';
-			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
+			$response     = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
 
 			if ( $this->validate_response( $response ) ) {
 				return false;
