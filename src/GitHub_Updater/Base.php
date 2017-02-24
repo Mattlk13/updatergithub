@@ -170,8 +170,6 @@ class Base {
 		// Load hook for shiny updates Bitbucket authentication headers.
 		$bitbucket = new Bitbucket_API( new \stdClass() );
 		add_filter( 'http_request_args', array( &$bitbucket, 'ajax_maybe_authenticate_http' ), 15, 2 );
-		$bbenterprise = new Bitbucket_Server_API( new \stdClass() );
-		add_filter( 'http_request_args', array( &$bbenterprise, 'ajax_maybe_authenticate_http' ), 15, 2 );
 
 		add_filter( 'extra_theme_headers', array( &$this, 'add_headers' ) );
 		add_filter( 'extra_plugin_headers', array( &$this, 'add_headers' ) );
@@ -423,7 +421,7 @@ class Base {
 		$this->$type->watchers             = 0;
 		$this->$type->forks                = 0;
 		$this->$type->open_issues          = 0;
-		$this->$type->requires_wp_version  = '4.0';
+		$this->$type->requires_wp_version  = '4.4//';
 		$this->$type->requires_php_version = '5.3';
 		$this->$type->release_asset        = false;
 	}
@@ -526,24 +524,24 @@ class Base {
 			/*
 			 * Pre-WordPress 4.4
 			 */
-			if ( $plugins && empty( $hook_extra ) ) {
-				foreach ( array_reverse( $plugins ) as $plugin ) {
-					$slug = dirname( $plugin );
-					if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
-						$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
-						break;
-					}
-				}
-			}
-			if ( ! $plugins && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->plugin ) ) {
-					$slug = dirname( $upgrader->skin->plugin );
-				}
-				if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
-					$slug = sanitize_text_field( $_POST['slug'] );
-				}
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
+			//if ( $plugins && empty( $hook_extra ) ) {
+			//	foreach ( array_reverse( $plugins ) as $plugin ) {
+			//		$slug = dirname( $plugin );
+			//		if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
+			//			$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
+			//			break;
+			//		}
+			//	}
+			//}
+			//if ( ! $plugins && empty( $hook_extra ) ) {
+			//	if ( isset( $upgrader->skin->plugin ) ) {
+			//	//	$slug = dirname( $upgrader->skin->plugin );
+			//	}
+			//	if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
+			//		$slug = sanitize_text_field( $_POST['slug'] );
+			//	}
+			//	$new_source = trailingslashit( $remote_source ) . $slug;
+			//}
 		}
 
 		/*
@@ -559,21 +557,21 @@ class Base {
 			/*
 			 * Pre-WordPress 4.4
 			 */
-			if ( $themes && empty( $hook_extra ) ) {
-				foreach ( $themes as $theme ) {
-					$slug = $theme;
-					if ( false !== stristr( basename( $source ), $theme ) ) {
-						$new_source = trailingslashit( $remote_source ) . $theme;
-						break;
-					}
-				}
-			}
-			if ( ! $themes && empty( $hook_extra ) ) {
-				if ( isset( $upgrader->skin->theme ) ) {
-					$slug = $upgrader->skin->theme;
-				}
-				$new_source = trailingslashit( $remote_source ) . $slug;
-			}
+			//if ( $themes && empty( $hook_extra ) ) {
+			//	foreach ( $themes as $theme ) {
+			//		$slug = $theme;
+			//		if ( false !== stristr( basename( $source ), $theme ) ) {
+			//			$new_source = trailingslashit( $remote_source ) . $theme;
+			//			break;
+			//		}
+			//	}
+			//}
+			//if ( ! $themes && empty( $hook_extra ) ) {
+			//	if ( isset( $upgrader->skin->theme ) ) {
+			//		$slug = $upgrader->skin->theme;
+			//	}
+			//	$new_source = trailingslashit( $remote_source ) . $slug;
+			//}
 		}
 
 		$repo = $this->get_repo_slugs( $slug, $upgrader_object );

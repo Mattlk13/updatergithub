@@ -461,87 +461,22 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private Bitbucket repositories only.
 	 *
-	 * @param  $args
-	 * @param  $url
 	 *
-	 * @return mixed $args
-	 */
-	public function maybe_authenticate_http( $args, $url ) {
-		if ( ! isset( $this->type ) || false === stristr( $url, 'bitbucket' ) ||
-		     empty( $this->type->enterprise_api )
-		) {
-			return $args;
+
+
 		}
 
-		$bitbucket_private         = false;
-		$bitbucket_private_install = false;
-
-		/*
-		 * Check whether attempting to update private Bitbucket repo.
-		 */
-		if ( ( isset( $this->type->repo ) &&
-		       ! empty( parent::$options[ $this->type->repo ] ) &&
-		       false !== strpos( $url, $this->type->repo ) )
-		) {
-			$bitbucket_private = true;
-		}
-
-		/*
-		 * Check whether attempting to install private Bitbucket repo
-		 * and abort if Bitbucket user/pass not set.
-		 */
-		if ( isset( $_POST['option_page'], $_POST['is_private'] ) &&
-		     'github_updater_install' === $_POST['option_page'] &&
-		     'bitbucket' === $_POST['github_updater_api'] &&
-		     ( ! empty( parent::$options['bitbucket_enterprise_username'] ) || ! empty( parent::$options['bitbucket_enterprise_password'] ) )
-		) {
-			$bitbucket_private_install = true;
-		}
-
-		if ( $bitbucket_private || $bitbucket_private_install ) {
-			$username                         = parent::$options['bitbucket_enterprise_username'];
-			$password                         = parent::$options['bitbucket_enterprise_password'];
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
-		}
-
-		return $args;
 	}
 
 	/**
-	 * Add Basic Authentication $args to http_request_args filter hook
-	 * for private Bitbucket repositories only during AJAX.
 	 *
-	 * @param $args
-	 * @param $url
 	 *
-	 * @return mixed
 	 */
-	public function ajax_maybe_authenticate_http( $args, $url ) {
-		global $wp_current_filter;
-
-		$ajax_update    = array( 'wp_ajax_update-plugin', 'wp_ajax_update-theme' );
-		$is_ajax_update = array_intersect( $ajax_update, $wp_current_filter );
-
-		if ( ! empty( $is_ajax_update ) ) {
-			$this->load_options();
 		}
 
-		if ( parent::is_doing_ajax() && ! parent::is_heartbeat() &&
-		     ( isset( $_POST['slug'] ) && array_key_exists( $_POST['slug'], self::$options ) &&
-		       1 == self::$options[ $_POST['slug'] ] &&
-		       false !== stristr( $url, $_POST['slug'] ) )
-		) {
-			$username                         = self::$options['bitbucket_enterprise_username'];
-			$password                         = self::$options['bitbucket_enterprise_password'];
-			$args['headers']['Authorization'] = 'Basic ' . base64_encode( "$username:$password" );
 
-			return $args;
-		}
 
-		return $args;
 	}
 
 }
