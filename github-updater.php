@@ -22,7 +22,7 @@
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  * GitHub Branch:     feature/bitbucket-enterprise-api
  * GitHub Languages:  https://github.com/afragen/github-updater-translations
- * Requires WP:       4.0
+ * Requires WP:       4.4
  * Requires PHP:      5.3
  */
 

@@ -520,28 +520,6 @@ class Base {
 				$slug       = dirname( $hook_extra['plugin'] );
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			//if ( $plugins && empty( $hook_extra ) ) {
-			//	foreach ( array_reverse( $plugins ) as $plugin ) {
-			//		$slug = dirname( $plugin );
-			//		if ( false !== stristr( basename( $source ), dirname( $plugin ) ) ) {
-			//			$new_source = trailingslashit( $remote_source ) . dirname( $plugin );
-			//			break;
-			//		}
-			//	}
-			//}
-			//if ( ! $plugins && empty( $hook_extra ) ) {
-			//	if ( isset( $upgrader->skin->plugin ) ) {
-			//	//	$slug = dirname( $upgrader->skin->plugin );
-			//	}
-			//	if ( empty( $slug ) && isset( $_POST['slug'] ) ) {
-			//		$slug = sanitize_text_field( $_POST['slug'] );
-			//	}
-			//	$new_source = trailingslashit( $remote_source ) . $slug;
-			//}
 		}
 
 		/*
@@ -553,25 +531,6 @@ class Base {
 				$slug       = $hook_extra['theme'];
 				$new_source = trailingslashit( $remote_source ) . $slug;
 			}
-
-			/*
-			 * Pre-WordPress 4.4
-			 */
-			//if ( $themes && empty( $hook_extra ) ) {
-			//	foreach ( $themes as $theme ) {
-			//		$slug = $theme;
-			//		if ( false !== stristr( basename( $source ), $theme ) ) {
-			//			$new_source = trailingslashit( $remote_source ) . $theme;
-			//			break;
-			//		}
-			//	}
-			//}
-			//if ( ! $themes && empty( $hook_extra ) ) {
-			//	if ( isset( $upgrader->skin->theme ) ) {
-			//		$slug = $upgrader->skin->theme;
-			//	}
-			//	$new_source = trailingslashit( $remote_source ) . $slug;
-			//}
 		}
 
 		$repo = $this->get_repo_slugs( $slug, $upgrader_object );
