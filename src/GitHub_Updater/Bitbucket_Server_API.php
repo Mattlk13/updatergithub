@@ -40,7 +40,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 *
 	 * @var null
 	 */
-	protected static $method = null;
+	private static $method = null;
 
 	/**
 	 * Constructor.
@@ -366,10 +366,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return string
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-		if ( empty( $git->type->branch ) ) {
-			//$git->type->branch = 'master';
-		}
-
 		switch ( self::$method ) {
 			case 'meta':
 			case 'tags':

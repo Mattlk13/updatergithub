@@ -32,7 +32,7 @@ class GitLab_API extends API {
 	 *
 	 * @var null
 	 */
-	protected static $method = null;
+	private static $method = null;
 
 	/**
 	 * Constructor.
@@ -71,10 +71,6 @@ class GitLab_API extends API {
 		if ( ! $response ) {
 			$id           = $this->get_gitlab_id();
 			self::$method = 'file';
-
-			if ( empty( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
 
 			$response = $this->api( '/projects/' . $id . '/repository/files?file_path=' . $file );
 
@@ -484,7 +480,7 @@ class GitLab_API extends API {
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
-		 * If using GitLab CE/Enterprise header return this endpoint.
+		 * If GitLab CE/Enterprise return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
 			return $git->type->enterprise_api . $endpoint;
