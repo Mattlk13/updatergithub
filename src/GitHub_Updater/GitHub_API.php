@@ -28,6 +28,13 @@ if ( ! defined( 'WPINC' ) ) {
 class GitHub_API extends API {
 
 	/**
+	 * Holds loose class method name.
+	 *
+	 * @var null
+	 */
+	private static $method = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param object $type
@@ -48,6 +55,7 @@ class GitHub_API extends API {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
+			self::$method = 'file';
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $file );
 			if ( ! isset( $response->content ) ) {
 				return false;
@@ -80,6 +88,7 @@ class GitHub_API extends API {
 		$response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
 
 		if ( ! $response ) {
+			self::$method = 'tags';
 			$response = $this->api( '/repos/:owner/:repo/tags' );
 
 			if ( ! $response ) {
@@ -127,6 +136,7 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
+			self::$method = 'changes';
 			$response = $this->api( '/repos/:owner/:repo/contents/' . $changes );
 
 			if ( $response ) {
@@ -175,6 +185,7 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
+			self::$method = 'readme';
 			$response = $this->api( '/repos/:owner/:repo/contents/readme.txt' );
 		}
 
@@ -203,6 +214,7 @@ class GitHub_API extends API {
 		$response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
 
 		if ( ! $response ) {
+			self::$method = 'meta';
 			$response = $this->api( '/repos/:owner/:repo' );
 
 			if ( $response ) {
@@ -235,6 +247,7 @@ class GitHub_API extends API {
 		}
 
 		if ( ! $response ) {
+			self::$method = 'branches';
 			$response = $this->api( '/repos/:owner/:repo/branches' );
 
 			if ( $response ) {
@@ -338,6 +351,7 @@ class GitHub_API extends API {
 		$type     = explode( '_', $this->type->type );
 
 		if ( ! $response ) {
+			self::$method = 'translation';
 			$response = $this->api( '/repos/' . $headers['owner'] . '/' . $headers['repo'] . '/contents/language-pack.json' );
 
 			if ( $this->validate_response( $response ) ) {
@@ -411,27 +425,25 @@ class GitHub_API extends API {
 	 * @return string $endpoint
 	 */
 	protected function add_endpoints( $git, $endpoint ) {
-
-		/*
-		 * If a branch has been given, only check that for the remote info.
-		 * If it's not been given, GitHub will use the Default branch.
-		 */
-		if ( ! empty( $git->type->branch ) ) {
-			$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+		switch ( self::$method ) {
+			case 'file':
+			case 'readme':
+				$endpoint = add_query_arg( 'ref', $git->type->branch, $endpoint );
+				break;
+			case 'meta':
+			case 'tags':
+			case 'changes':
+			case 'download_link':
+			case 'translation':
+				break;
+			default:
+				break;
 		}
 
 		$endpoint = $this->add_access_token_endpoint( $git, $endpoint );
 
 		/*
-		 * Remove branch endpoint if a translation file.
-		 */
-		$repo = explode( '/', $endpoint );
-		if ( isset( $repo[3] ) && $repo[3] !== $git->type->repo ) {
-			$endpoint = remove_query_arg( 'ref', $endpoint );
-		}
-
-		/*
-		 * If using GitHub Enterprise header return this endpoint.
+		 * If GitHub Enterprise return this endpoint.
 		 */
 		if ( ! empty( $git->type->enterprise_api ) ) {
 			return $git->type->enterprise_api . $endpoint;
@@ -592,4 +604,5 @@ class GitHub_API extends API {
 
 		return $args;
 	}
+
 }
