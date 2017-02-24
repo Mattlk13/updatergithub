@@ -192,37 +192,28 @@ class Install extends Base {
 				}
 
 				if ( ! $bitbucket_org ) {
-					$header = $this->parse_header_uri( self::$install['github_updater_repo'] );
-
 					self::$install['download_link'] = implode( '/', array(
 						$base,
 						'rest/archive/1.0/projects',
-						$header['owner'],
+						$headers['owner'],
 						'repos',
-						$header['repo'],
+						$headers['repo'],
 						'archive',
 					) );
 
-					//self::$install['download_link'] = implode( '/', array(
-					//	$base,
-					//	'plugins/servlet/archive/projects',
-					//	$header['owner'],
-					//	'repos',
-					//	$header['repo'],
-					//) );
-
 					self::$install['download_link'] = add_query_arg( array(
+						'prefix' => $headers['repo'] . '/',
 						'at'     => self::$install['github_updater_branch'],
 					), self::$install['download_link'] );
 
 					if ( isset( self::$install['is_private'] ) ) {
 						parent::$options[ self::$install['repo'] ] = 1;
 					}
-					if ( isset( self::$install['bitbucket_enterprise_username'] ) ) {
-						parent::$options['bitbucket_enterprise_username'] = self::$install['bitbucket_enterprise_username'];
+					if ( ! empty( self::$install['bitbucket_username'] ) ) {
+						parent::$options['bitbucket_enterprise_username'] = self::$install['bitbucket_username'];
 					}
-					if ( isset( self::$install['bitbucket_enterprise_password'] ) ) {
-						parent::$options['bitbucket_enterprise_password'] = self::$install['bitbucket_enterprise_password'];
+					if ( ! empty( self::$install['bitbucket_password'] ) ) {
+						parent::$options['bitbucket_enterprise_password'] = self::$install['bitbucket_password'];
 					}
 
 					new Bitbucket_Server_API( (object) $type );
@@ -419,8 +410,12 @@ class Install extends Base {
 			$type
 		);
 
-		if ( empty( parent::$options['bitbucket_username'] ) ||
-		     empty( parent::$options['bitbucket_password'] )
+		if ( ( empty( parent::$options['bitbucket_username'] ) ||
+		       empty( parent::$options['bitbucket_password'] ) ) ||
+		     (
+		     ( empty( parent::$options['bitbucket_enterprise_username'] ) ||
+		       empty( parent::$options['bitbucket_enterprise_password'] ) )
+		     )
 		) {
 			add_settings_field(
 				'bitbucket_username',
