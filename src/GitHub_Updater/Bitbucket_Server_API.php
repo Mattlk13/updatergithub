@@ -351,7 +351,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$endpoint     = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
-			$endpoint = add_query_arg( 'at', $branch_switch, $endpoint );
+			$endpoint = urldecode( add_query_arg( 'at', $branch_switch, $endpoint ) );
 		}
 
 		return $download_link_base . $endpoint;
@@ -387,7 +387,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 				$defaults = array( 'prefix' => $git->type->repo . '/', 'at' => $git->type->branch );
 				$endpoint = add_query_arg( $defaults, $endpoint );
 				if ( ! empty( $git->type->tags ) ) {
-					$endpoint = add_query_arg( 'at', $git->type->newest_tag, $endpoint );
+					$endpoint = urldecode( add_query_arg( 'at', $git->type->newest_tag, $endpoint ) );
 				}
 				break;
 			default:
