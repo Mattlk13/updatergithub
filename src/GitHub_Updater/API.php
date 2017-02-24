@@ -119,9 +119,15 @@ abstract class API extends Base {
 				$arr['base_download'] = 'https://github.com';
 				break;
 			case 'bitbucket':
-				$arr['repo']          = 'bitbucket';
-				$arr['base_uri']      = 'https://bitbucket.org/api';
-				$arr['base_download'] = 'https://bitbucket.org';
+				$arr['repo'] = 'bitbucket';
+				if ( empty( $this->type->enterprise ) ) {
+					$arr['base_uri']      = 'https://bitbucket.org/api';
+					$arr['base_download'] = 'https://bitbucket.org';
+
+				} else {
+					$arr['base_uri']      = $this->type->enterprise_api;
+					$arr['base_download'] = $this->type->enterprise;
+				}
 				break;
 			case 'gitlab':
 				$arr['repo']          = 'gitlab';
@@ -182,13 +188,13 @@ abstract class API extends Base {
 	/**
 	 * Return API url.
 	 *
-	 * @access private
+	 * @access protected
 	 *
 	 * @param string $endpoint
 	 *
 	 * @return string $endpoint
 	 */
-	private function get_api_url( $endpoint ) {
+	protected function get_api_url( $endpoint ) {
 		$type     = $this->return_repo_type();
 		$segments = array(
 			'owner'  => $this->type->owner,
@@ -217,6 +223,8 @@ abstract class API extends Base {
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
+					$api = new Bitbucket_Server_API( new \stdClass() );
+					$endpoint = $api->add_endpoints( $this, $endpoint );
 					return $this->type->enterprise_api . $endpoint;
 				}
 				break;

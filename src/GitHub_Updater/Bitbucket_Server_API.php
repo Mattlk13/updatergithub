@@ -36,6 +36,13 @@ if ( ! defined( 'WPINC' ) ) {
 class Bitbucket_Server_API extends Bitbucket_API {
 
 	/**
+	 * Holds loose class method name.
+	 *
+	 * @var null
+	 */
+	protected static $method = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param object $type
@@ -83,12 +90,8 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
 
 		if ( ! $response ) {
-			if ( empty( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
-
-			$path = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
-			$path = add_query_arg( 'at', $this->type->branch, $path );
+			self::$method = 'file';
+			$path         = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
 
 			$response = $this->api( $path );
 
@@ -107,27 +110,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		$this->set_file_info( $response );
 
 		return true;
-	}
-
-
-	/**
-	 * Combines separate text lines from API response
-	 * into one string with \n line endings.
-	 * Code relying on raw text can now parse it.
-	 *
-	 * @param object $response
-	 *
-	 * @return string combined lines of text returned by API
-	 */
-	private function _recombine_response( $response ) {
-		$remote_info_file = '';
-		if ( is_array( $response->lines ) ) {
-			foreach ( $response->lines as $line ) {
-				$remote_info_file .= $line->text . "\n";
-			}
-		}
-
-		return $remote_info_file;
 	}
 
 	/**
@@ -179,10 +161,10 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		 * Set $response from local file if no update available.
 		 */
 		if ( ! $response && ! $this->can_update( $this->type ) ) {
-			$response = new \stdClass();
+			$response = array();
 			$content  = $this->get_local_info( $this->type, $changes );
 			if ( $content ) {
-				$response->data = $content;
+				$response['changes'] = $content;
 				$this->set_repo_cache( 'changes', $response );
 			} else {
 				$response = false;
@@ -190,9 +172,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
+			self::$method = 'changes';
 
 			// use a constructed url to fetch the raw file response
 			// due to lack of file download option in Bitbucket Server
@@ -250,9 +230,7 @@ class Bitbucket_Server_API extends Bitbucket_API {
 		}
 
 		if ( ! $response ) {
-			if ( ! isset( $this->type->branch ) ) {
-				$this->type->branch = 'master';
-			}
+			self::$method = 'readme';
 
 			$response = $this->_fetch_raw_file( 'readme.txt' );
 
@@ -277,38 +255,6 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		return true;
 	}
-
-
-	/**
-	 * The Bitbucket Server REST API does not support downloading files directly at the moment
-	 * therefore we'll use this to construct urls to fetch the raw files ourselves.
-	 *
-	 * @param string $file filename
-	 *
-	 * @return bool|array false upon failure || return wp_remote_get() response array
-	 **/
-	private function _fetch_raw_file( $file ) {
-		$file         = urlencode( $file );
-		$download_url = implode( '/', array(
-			$this->type->enterprise,
-			'projects',
-			$this->type->owner,
-			'repos',
-			$this->type->repo,
-			'browse',
-			$file,
-		) );
-		$download_url = add_query_arg( array( 'at' => $this->type->branch, 'raw' => '' ), $download_url );
-
-		$response = wp_remote_get( esc_url_raw( $download_url ) );
-
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		return $response;
-	}
-
 
 	/**
 	 * Read the repository meta from API
@@ -356,8 +302,9 @@ class Bitbucket_Server_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			$response = $this->api( '/1.0/projects/:owner/repos/:repo/branches' );
-			if ( $response ) {
-				foreach ( $response as $branch => $api_response ) {
+			if ( $response->values ) {
+				foreach ( $response->values as $value ) {
+					$branch              = $value->displayId;
 					$branches[ $branch ] = $this->construct_download_link( false, $branch );
 				}
 				$this->type->branches = $branches;
@@ -385,41 +332,73 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	 * @return string $endpoint
 	 */
 	public function construct_download_link( $rollback = false, $branch_switch = false ) {
-
-		/*
-		 * Downloads requires the forked stash-archive plugin which enables
+		/**
+		 * Downloads requires the official stash-archive plugin which enables
 		 * subdirectory support using the prefix query argument
-		 * see https://bitbucket.org/BjornW/stash-archive/src
-		 * the jar-file directory contains a jar file for convenience so you don't have
-		 * to install the Atlassian SDK
+		 *
+		 * @link https://bitbucket.org/atlassian/stash-archive
 		 */
 		$download_link_base = implode( '/', array(
 			$this->type->enterprise,
-			'plugins/servlet/archive/projects',
+			'rest/archive/1.0/projects',
 			$this->type->owner,
 			'repos',
 			$this->type->repo,
+			'archive',
 		) );
 
-		$endpoint = '';
-
-		/*
-		 * add a prefix query argument to create a subdirectory with the same name
-		 * as the repo, e.g. 'my-repo' becomes 'my-repo/'
-		 */
-		//$endpoint = add_query_arg( 'prefix', $this->type->repo . '/', $endpoint );
-
-		if ( 'master' != $this->type->branch || empty( $this->type->tags ) ) {
-			$endpoint = add_query_arg( 'at', $this->type->branch, $endpoint );
-		} else {
-			$endpoint = add_query_arg( 'at', $this->type->newest_tag, $endpoint );
-		}
+		self::$method = 'download_link';
+		$endpoint     = $this->add_endpoints( $this, '' );
 
 		if ( $branch_switch ) {
 			$endpoint = add_query_arg( 'at', $branch_switch, $endpoint );
 		}
 
 		return $download_link_base . $endpoint;
+	}
+
+	/**
+	 * Create Bitbucket Server API endpoints.
+	 *
+	 * @param $git      object
+	 * @param $endpoint string
+	 *
+	 * @return string
+	 */
+	protected function add_endpoints( $git, $endpoint ) {
+		if ( empty( $git->type->branch ) ) {
+			//$git->type->branch = 'master';
+		}
+
+		switch ( self::$method ) {
+			case 'meta':
+			case 'tags':
+			case 'translation':
+				break;
+			case 'file':
+			case 'readme':
+				$endpoint = add_query_arg( 'at', $git->type->branch, $endpoint );
+				break;
+			case 'changes':
+				$endpoint = add_query_arg( array( 'at' => $git->type->branch, 'raw' => '' ), $endpoint );
+				break;
+			case 'download_link':
+				/*
+				 * Add a prefix query argument to create a subdirectory with the same name
+				 * as the repo, e.g. 'my-repo' becomes 'my-repo/'
+				 * Required for using stash-archive.
+				 */
+				$defaults = array( 'prefix' => $git->type->repo . '/', 'at' => $git->type->branch );
+				$endpoint = add_query_arg( $defaults, $endpoint );
+				if ( ! empty( $git->type->tags ) ) {
+					$endpoint = add_query_arg( 'at', $git->type->newest_tag, $endpoint );
+				}
+				break;
+			default:
+				break;
+		}
+
+		return $endpoint;
 	}
 
 	/**
@@ -461,22 +440,80 @@ class Bitbucket_Server_API extends Bitbucket_API {
 	}
 
 	/**
+	 * The Bitbucket Server REST API does not support downloading files directly at the moment
+	 * therefore we'll use this to construct urls to fetch the raw files ourselves.
 	 *
+	 * @param string $file filename
 	 *
+	 * @return bool|array false upon failure || return wp_safe_remote_get() response array
+	 **/
+	private function _fetch_raw_file( $file ) {
+		$file         = urlencode( $file );
+		$download_url = '/1.0/projects/:owner/repos/:repo/browse/' . $file;
+		$download_url = $this->add_endpoints( $this, $download_url );
+		$download_url = $this->get_api_url( $download_url );
 
+		$response = wp_safe_remote_get( $download_url );
 
+		if ( is_wp_error( $response ) ) {
+			return false;
 		}
 
+		return $response;
 	}
 
 	/**
+	 * Combines separate text lines from API response into one string with \n line endings.
+	 * Code relying on raw text can now parse it.
 	 *
+	 * @param object $response
 	 *
+	 * @return string Combined lines of text returned by API
 	 */
+	private function _recombine_response( $response ) {
+		$remote_info_file = '';
+		$json_decoded     = json_decode( $response );
+		$response         = empty( $json_decoded ) ? $response : $json_decoded;
+		if ( isset( $response->lines ) ) {
+			foreach ( $response->lines as $line ) {
+				$remote_info_file .= $line->text . "\n";
+			}
 		}
 
+		return $remote_info_file;
+	}
 
+	/**
+	 * Parse API response and return array of meta variables.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of meta variables.
+	 */
+	protected function parse_meta_response( $response ) {
+		$arr      = array();
+		$response = array( $response );
 
+		array_filter( $response, function( $e ) use ( &$arr ) {
+			$arr['private']      = ! $e->public;
+			$arr['last_updated'] = null;
+			$arr['watchers']     = 0;
+			$arr['forks']        = 0;
+			$arr['open_issues']  = 0;
+		} );
+
+		return $arr;
+	}
+
+	/**
+	 * Parse API response and return array with changelog.
+	 *
+	 * @param object $response Response from API call.
+	 *
+	 * @return array $arr Array of changes in base64.
+	 */
+	protected function parse_changelog_response( $response ) {
+		return array( 'changes' => $this->_recombine_response( $response ) );
 	}
 
 }
