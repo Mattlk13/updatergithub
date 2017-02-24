@@ -194,25 +194,24 @@ class Install extends Base {
 				if ( ! $bitbucket_org ) {
 					$header = $this->parse_header_uri( self::$install['github_updater_repo'] );
 
-					//self::$install['download_link'] = implode( '/', array(
-					//	$base,
-					//	'rest/archive/latest/projects',
-					//	$header['owner'],
-					//	'repos',
-					//	$header['repo'],
-					//	'archive',
-					//) );
-
 					self::$install['download_link'] = implode( '/', array(
 						$base,
-						'plugins/servlet/archive/projects',
+						'rest/archive/1.0/projects',
 						$header['owner'],
 						'repos',
 						$header['repo'],
+						'archive',
 					) );
 
+					//self::$install['download_link'] = implode( '/', array(
+					//	$base,
+					//	'plugins/servlet/archive/projects',
+					//	$header['owner'],
+					//	'repos',
+					//	$header['repo'],
+					//) );
+
 					self::$install['download_link'] = add_query_arg( array(
-						'prefix' => $header['repo'] . '/',
 						'at'     => self::$install['github_updater_branch'],
 					), self::$install['download_link'] );
 
