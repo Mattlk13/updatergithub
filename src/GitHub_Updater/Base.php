@@ -505,7 +505,7 @@ class Base {
 	 * @return string
 	 */
 	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = null ) {
-		global $wp_filesystem, $plugins, $themes;
+		global $wp_filesystem;
 		$slug            = null;
 		$repo            = null;
 		$new_source      = null;
