@@ -1096,7 +1096,7 @@ class Base {
 	 * @return null|string
 	 */
 	protected function get_local_info( $repo, $file ) {
-		$response = null;
+		$response = false;
 
 		if ( isset( $_POST['ghu_refresh_cache'] ) ) {
 			return $response;
