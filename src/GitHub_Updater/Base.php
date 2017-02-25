@@ -1308,7 +1308,7 @@ class Base {
 		}
 
 		$transient         = 'update_' . $type . 's';
-		$this->tag         = $_GET['rollback'];
+		$this->tag         = isset( $_GET['rollback'] ) ? $_GET['rollback'] : null;
 		$slug              = 'plugin' === $type ? $repo->slug : $repo->repo;
 		$updates_transient = get_site_transient( $transient );
 		$rollback          = array(
