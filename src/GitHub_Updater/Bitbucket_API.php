@@ -211,7 +211,6 @@ class Bitbucket_API extends API {
 				$response          = new \stdClass();
 				$response->message = 'No readme found';
 			}
-
 		}
 
 		if ( $response && isset( $response->data ) ) {

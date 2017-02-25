@@ -232,13 +232,13 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 				$response          = new \stdClass();
 				$response->message = 'No readme found';
 			}
+		}
 
-			if ( $response && isset( $response->data ) ) {
-				$file     = $response->data;
-				$parser   = new Readme_Parser( $file );
-				$response = $parser->parse_data();
-				$this->set_repo_cache( 'readme', $response );
-			}
+		if ( $response && isset( $response->data ) ) {
+			$file     = $response->data;
+			$parser   = new Readme_Parser( $file );
+			$response = $parser->parse_data();
+			$this->set_repo_cache( 'readme', $response );
 		}
 
 		if ( $this->validate_response( $response ) ) {
