@@ -8,12 +8,6 @@
  * @link      https://github.com/afragen/github-updater
  */
 
-/**
- * TODO:
- * - paging API support, for we're limited to Bitbucket Server default limit of 25
- * - personal repositories are not yet supported, using project based repositories
- **/
-
 namespace Fragen\GitHub_Updater;
 
 /*
@@ -24,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Class Bitbucket_Server_API
+ * Class Bitbucket_Enterprise_API
  *
  * Get remote data from a self-hosted Bitbucket Server repo.
  * Assumes an owner == project_key
@@ -33,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @author  Andy Fragen
  * @author  Bjorn Wijers
  */
-class Bitbucket_Server_API extends Bitbucket_API {
+class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 	/**
 	 * Holds loose class method name.

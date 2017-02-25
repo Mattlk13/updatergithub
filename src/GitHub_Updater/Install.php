@@ -216,7 +216,7 @@ class Install extends Base {
 						parent::$options['bitbucket_enterprise_password'] = self::$install['bitbucket_password'];
 					}
 
-					new Bitbucket_Server_API( (object) $type );
+					new Bitbucket_Enterprise_API( (object) $type );
 				}
 			}
 
