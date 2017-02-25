@@ -167,9 +167,6 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-
-			// use a constructed url to fetch the raw file response
-			// due to lack of file download option in Bitbucket Server
 			$response = $this->_fetch_raw_file( $changes );
 
 			if ( ! $response ) {
@@ -202,12 +199,6 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
-		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
-		) {
-			return false;
-		}
-
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
 		/*
@@ -225,12 +216,16 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-
 			$response = $this->_fetch_raw_file( 'readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
 				$response->message = 'No readme found';
+			}
+
+			if ( $response ) {
+				$response = wp_remote_retrieve_body( $response );
+				$response = $this->parse_readme_response( $response );
 			}
 		}
 
@@ -456,7 +451,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * Combines separate text lines from API response into one string with \n line endings.
 	 * Code relying on raw text can now parse it.
 	 *
-	 * @param object $response
+	 * @param string $response
 	 *
 	 * @return string Combined lines of text returned by API
 	 */
@@ -506,4 +501,18 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 		return array( 'changes' => $this->_recombine_response( $response ) );
 	}
 
+	/**
+	 * Parse API response and return object with readme body.
+	 *
+	 * @param string $response
+	 *
+	 * @return object $response
+	 */
+	protected function parse_readme_response( $response ) {
+		$content        = $this->_recombine_response( $response );
+		$response       = new \stdClass();
+		$response->data = $content;
+
+		return $response;
+	}
 }
