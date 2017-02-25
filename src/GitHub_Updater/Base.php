@@ -1273,7 +1273,7 @@ class Base {
 			$type = 'theme';
 		}
 
-		if ( ! empty( $slug ) && array_key_exists( $slug, $this->config ) ) {
+		if ( ! empty( $slug ) && array_key_exists( $slug, (array) $this->config ) ) {
 			$repo = $this->config[ $slug ];
 			$this->set_rollback_transient( $type, $repo );
 		}
