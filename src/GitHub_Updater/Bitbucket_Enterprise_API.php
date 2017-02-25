@@ -167,7 +167,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'changes';
-			$response = $this->_fetch_raw_file( $changes );
+			$response     = $this->_fetch_raw_file( $changes );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();
@@ -199,6 +199,10 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
+		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
+			return false;
+		}
+
 		$response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
 
 		/*
@@ -216,7 +220,7 @@ class Bitbucket_Enterprise_API extends Bitbucket_API {
 
 		if ( ! $response ) {
 			self::$method = 'readme';
-			$response = $this->_fetch_raw_file( 'readme.txt' );
+			$response     = $this->_fetch_raw_file( 'readme.txt' );
 
 			if ( ! $response ) {
 				$response          = new \stdClass();

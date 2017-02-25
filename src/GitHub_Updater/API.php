@@ -223,8 +223,9 @@ abstract class API extends Base {
 				break;
 			case 'bitbucket':
 				if ( $this->type->enterprise_api ) {
-					$api = new Bitbucket_Enterprise_API( new \stdClass() );
+					$api      = new Bitbucket_Enterprise_API( new \stdClass() );
 					$endpoint = $api->add_endpoints( $this, $endpoint );
+
 					return $this->type->enterprise_api . $endpoint;
 				}
 				break;
@@ -355,6 +356,24 @@ abstract class API extends Base {
 		$response = ( 'in dot org' === $response ) ? true : false;
 
 		return $response;
+	}
+
+	/**
+	 * Check if a local file for the repository exists.
+	 * Only checks the root directory of the repository.
+	 *
+	 * @param $filename
+	 *
+	 * @return bool
+	 */
+	protected function exists_local_file( $filename ) {
+		if ( file_exists( $this->type->local_path . $filename ) ||
+		     file_exists( $this->type->local_path_extended . $filename )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 }

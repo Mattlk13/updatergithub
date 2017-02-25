@@ -163,9 +163,7 @@ class GitHub_API extends API {
 	 * @return bool
 	 */
 	public function get_remote_readme() {
-		if ( ! file_exists( $this->type->local_path . 'readme.txt' ) &&
-		     ! file_exists( $this->type->local_path_extended . 'readme.txt' )
-		) {
+		if ( ! $this->exists_local_file( 'readme.txt' ) ) {
 			return false;
 		}
 
